@@ -8,7 +8,7 @@ import websockets
 
 KEY = os.environ["AISSTREAM_KEY"].strip()
 SITE = os.environ.get("SITE_URL", "").rstrip("/")
-DUR = int(os.environ.get("DURATA", "80"))
+DUR = int(os.environ.get("DURATA", "200"))
 # Mediterraneo centro-orientale + Adriatico e Ionio (lat, lon)
 BOXES = [[[30.0, 7.5], [46.5, 36.5]]]
 TARANTO = (40.38, 17.05, 40.52, 17.32)  # area porto e rada: qui si tiene tutto
@@ -98,7 +98,7 @@ def keep(s):
     age = NOW - (s.get("t") or s.get("ts") or 0)
     tanker = isinstance(typ, int) and 80 <= typ <= 89
     if in_taranto(s.get("lat"), s.get("lon")):
-        return age < 3 * 86400
+        return age < 2 * 86400
     if tanker:
         return age < 4 * 86400
     if typ is None:  # tipo non ancora noto: lo teniamo poco (solo vicino a Taranto), in attesa dei dati statici
