@@ -51,12 +51,16 @@ async def collect(ships):
                 raw = await asyncio.wait_for(ws.recv(), timeout=max(1, end - time.time()))
             except asyncio.TimeoutError:
                 break
+            except websockets.ConnectionClosed as e:
+                print("::warning::connessione chiusa da aisstream: " + repr(e))
+                break
             try:
                 m = json.loads(raw)
             except ValueError:
                 continue
             if "error" in m:
-                raise SystemExit("aisstream: " + str(m["error"]))
+                print("::warning::aisstream: " + str(m["error"]))
+                break
             md = m.get("MetaData", {})
             mmsi = str(g(md, "MMSI", "MMSI_String") or "")
             if not mmsi:
@@ -115,10 +119,8 @@ def main():
         try:
             n = asyncio.run(collect(ships))
             break
-        except SystemExit:
-            raise
         except Exception as e:
-            print("errore connessione:", e)
+            print("::warning::errore connessione: " + repr(e))
             time.sleep(5)
     out = [s for s in ships.values() if keep(s)]
     data = {"updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "messages": n, "ships": out}
